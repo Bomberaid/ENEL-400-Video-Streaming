@@ -4,4 +4,4 @@ COPY server/requirements.txt .
 RUN pip install -r requirements.txt
 COPY server/server.py .
 COPY web/ ../web/
-CMD ["python", "-u", "server.py"]
+CMD ["gunicorn", "--worker-class", "eventlet", "-w", "1", "--bind", "0.0.0.0:8080", "server:app"]

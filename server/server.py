@@ -7,10 +7,10 @@ from flask_socketio import SocketIO
 UDP_PORT = 3000
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-WEB_DIR  = os.path.join(BASE_DIR, "../web") # Keep an eye on this path. It might cause a bug if the structure changes.
+WEB_DIR  = os.path.join(BASE_DIR, "../web")
 
 app      = Flask(__name__, static_folder=WEB_DIR)
-socketio = SocketIO(app, cors_allowed_origins="*", async_mode="threading")
+socketio = SocketIO(app, cors_allowed_origins="*", async_mode="eventlet")
 
 latest_frame = None
 frame_buffer = {}
@@ -75,7 +75,11 @@ def udp_listener():
                     socketio.emit("frame", frame)
 
 
+# This runs when gunicorn imports the module, not just when run directly
+udp_thread = threading.Thread(target=udp_listener, daemon=True)
+udp_thread.start()
+
+
 if __name__ == "__main__":
-    threading.Thread(target=udp_listener, daemon=True).start()
     print("Starting Flask-SocketIO server on :8080")
     socketio.run(app, host="0.0.0.0", port=8080, debug=False)
