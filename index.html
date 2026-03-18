@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>FPV Live</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      background: #000;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      font-family: monospace;
+      color: #0f0;
+    }
+    canvas { width: 100%; max-width: 800px; border: 1px solid #0f0; }
+    #stats { margin-top: 8px; font-size: 0.75rem; opacity: 0.6; }
+  </style>
+</head>
+<body>
+  <canvas id="view"></canvas>
+  <div id="stats">connecting...</div>
+
+  <!-- Socket.IO client — served automatically by Flask-SocketIO -->
+  <script src="/socket.io/socket.io.js"></script>
+  <script>
+    const canvas = document.getElementById("view");
+    const ctx    = canvas.getContext("2d");
+    const stats  = document.getElementById("stats");
+
+    let frameCount = 0;
+    let lastTime   = performance.now();
+
+    const socket = io();
+
+    socket.on("connect",    () => stats.textContent = "connected — waiting for frames...");
+    socket.on("disconnect", () => stats.textContent = "disconnected");
+
+    socket.on("frame", (data) => {
+      // data is raw JPEG bytes from the server
+      const blob = new Blob([data], { type: "image/jpeg" });
+      const url  = URL.createObjectURL(blob);
+      const img  = new Image();
+
+      img.onload = () => {
+        canvas.width  = img.width;
+        canvas.height = img.height;
+        ctx.drawImage(img, 0, 0);
+        URL.revokeObjectURL(url);
+
+        frameCount++;
+        const now = performance.now();
+        if (now - lastTime >= 1000) {
+          stats.textContent = `${frameCount} fps`;
+          frameCount = 0;
+          lastTime = now;
+        }
+      };
+      img.src = url;
+    });
+  </script>
+</body>
+</html>
+```
+
+---
+
+### Updated `requirements.txt`
+```
+flask
+flask-socketio
