@@ -1,6 +1,7 @@
 import os
 import socket
 import threading
+import time
 from flask import Flask, send_from_directory
 from flask_socketio import SocketIO
 
@@ -15,6 +16,7 @@ socketio = SocketIO(app, cors_allowed_origins="*", async_mode="eventlet")
 latest_frame = None
 frame_buffer = {}
 frame_lock   = threading.Lock()
+frame_timestamps = {}  # Track when each frame started assembling
 
 
 @app.route("/")
@@ -40,6 +42,27 @@ def reassemble_frame(chunks, total):
     return b"".join(chunks[i] for i in range(total))
 
 
+def is_valid_jpeg(data: bytes) -> bool:
+    """Check JPEG starts with SOI and ends with EOI markers."""
+    return (
+        len(data) > 4
+        and data[:2] == b"\xff\xd8"
+        and data[-2:] == b"\xff\xd9"
+    )
+
+
+def evict_stale_frames():
+    """Remove incomplete frames older than 200ms to prevent buffer bloat."""
+    now = time.time()
+    stale = [
+        fid for fid, ts in frame_timestamps.items()
+        if now - ts > 0.2
+    ]
+    for fid in stale:
+        frame_buffer.pop(fid, None)
+        frame_timestamps.pop(fid, None)
+
+
 def udp_listener():
     global latest_frame, frame_buffer
 
@@ -58,24 +81,25 @@ def udp_listener():
         payload      = data[6:]
 
         with frame_lock:
+            evict_stale_frames()
+
             if frame_id not in frame_buffer:
-                if len(frame_buffer) > 10:
-                    oldest = min(frame_buffer.keys())
-                    del frame_buffer[oldest]
-                frame_buffer[frame_id] = {}
+                frame_buffer[frame_id]    = {}
+                frame_timestamps[frame_id] = time.time()
 
             frame_buffer[frame_id][chunk_index] = payload
 
             if len(frame_buffer[frame_id]) == total_chunks:
                 frame = reassemble_frame(frame_buffer[frame_id], total_chunks)
                 del frame_buffer[frame_id]
+                frame_timestamps.pop(frame_id, None)
 
-                if frame:
+                # Only broadcast if it's a valid JPEG — drop corrupt frames
+                if frame and is_valid_jpeg(frame):
                     latest_frame = frame
                     socketio.emit("frame", frame)
 
 
-# This runs when gunicorn imports the module, not just when run directly
 udp_thread = threading.Thread(target=udp_listener, daemon=True)
 udp_thread.start()
 
