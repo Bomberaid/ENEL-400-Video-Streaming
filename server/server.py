@@ -48,8 +48,11 @@ def is_valid_jpeg(data: bytes) -> bool:
         and data[-2:] == b"\xff\xd9"
     )
 
+last_frame_received = 0
+last_frame_emitted  = 0
+
 def udp_listener():
-    global latest_frame, frame_buffer
+    global latest_frame, frame_buffer, last_frame_received, last_frame_emitted
 
     sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     sock.bind(("0.0.0.0", UDP_PORT))
@@ -78,27 +81,23 @@ def udp_listener():
                 frame = reassemble_frame(frame_buffer[frame_id], total_chunks)
                 del frame_buffer[frame_id]
 
-                if frame:
-                    latest_frame = frame
-                    socketio.emit("frame", frame)
-
-        # In udp_listener() when a frame is completed, log receive rate
-        if frame and is_valid_jpeg(frame):
-            now = time.time()
-            recv_gap = now - last_frame_received
-            last_frame_received = now
-            
-            if recv_gap > 0.1:  # Log if gap between frames exceeds 100ms
-                print(f"WARNING: {recv_gap*1000:.0f}ms gap between received frames (ESP32 side problem)")
-            
-            latest_frame = bytes(frame)
-            
-            emit_start = time.time()
-            socketio.emit("frame", latest_frame)
-            emit_time = (time.time() - emit_start) * 1000
-            
-            if emit_time > 50:  # Log if emit takes more than 50ms
-                print(f"WARNING: emit took {emit_time:.0f}ms (server/browser side problem)")
+            # In udp_listener() when a frame is completed, log receive rate
+            if frame and is_valid_jpeg(frame):
+                now = time.time()
+                recv_gap = now - last_frame_received
+                last_frame_received = now
+                
+                if recv_gap > 0.1:  # Log if gap between frames exceeds 100ms
+                    print(f"WARNING: {recv_gap*1000:.0f}ms gap between received frames (ESP32 side problem)")
+                
+                latest_frame = bytes(frame)
+                
+                emit_start = time.time()
+                socketio.emit("frame", latest_frame)
+                emit_time = (time.time() - emit_start) * 1000
+                
+                if emit_time > 50:  # Log if emit takes more than 50ms
+                    print(f"WARNING: emit took {emit_time:.0f}ms (server/browser side problem)")
 
 
 # This runs when gunicorn imports the module, not just when run directly
