@@ -44,6 +44,8 @@ def udp_listener():
     global latest_frame, frame_buffer
 
     sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    # Increase receive buffer to 4MB
+    sock.setsockopt(socket.SOL_SOCKET, socket.SO_RCVBUF, 4 * 1024 * 1024)
     sock.bind(("0.0.0.0", UDP_PORT))
     print(f"UDP ingest listening on :{UDP_PORT}")
 
