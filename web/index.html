@@ -11,7 +11,6 @@
       --yellow: #ffd200;
       --blue:   #0057e7;
       --white:  #f0ede8;
-      --dark:   rgba(10, 8, 6, 0.82);
       --panel:  rgba(10, 8, 6, 0.72);
       --border: rgba(255, 210, 0, 0.35);
       --glow:   0 0 12px rgba(255, 210, 0, 0.5);
@@ -25,10 +24,8 @@
       color: var(--white);
       min-height: 100vh;
       overflow: hidden;
-      position: relative;
     }
 
-    /* Background image with dark overlay */
     .bg {
       position: fixed;
       inset: 0;
@@ -44,7 +41,6 @@
       background: rgba(6, 4, 2, 0.78);
     }
 
-    /* Scanline effect */
     .scanlines {
       position: fixed;
       inset: 0;
@@ -52,10 +48,8 @@
       pointer-events: none;
       background: repeating-linear-gradient(
         to bottom,
-        transparent 0px,
-        transparent 3px,
-        rgba(0,0,0,0.08) 3px,
-        rgba(0,0,0,0.08) 4px
+        transparent 0px, transparent 3px,
+        rgba(0,0,0,0.08) 3px, rgba(0,0,0,0.08) 4px
       );
     }
 
@@ -91,10 +85,7 @@
       color: var(--yellow);
       text-shadow: var(--glow);
     }
-
-    .header-logo span {
-      color: var(--red);
-    }
+    .header-logo span { color: var(--red); }
 
     .header-status {
       display: flex;
@@ -113,7 +104,7 @@
       margin-right: 5px;
       transition: background 0.3s;
     }
-    .status-dot.live { background: var(--red); box-shadow: 0 0 6px var(--red); animation: pulse 1.2s infinite; }
+    .status-dot.live      { background: var(--red);  box-shadow: 0 0 6px var(--red);  animation: pulse 1.2s infinite; }
     .status-dot.connected { background: #00e676; box-shadow: 0 0 6px #00e676; }
 
     @keyframes pulse {
@@ -121,21 +112,13 @@
       50%       { opacity: 0.3; }
     }
 
-    /* ── Left Panel ── */
-    .panel-left {
+    /* ── Cards ── */
+    .panel-left, .panel-right {
       display: flex;
       flex-direction: column;
       gap: 8px;
     }
 
-    /* ── Right Panel ── */
-    .panel-right {
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-    }
-
-    /* ── Data Card ── */
     .card {
       background: var(--panel);
       border: 1px solid var(--border);
@@ -144,8 +127,8 @@
       backdrop-filter: blur(8px);
       position: relative;
       overflow: hidden;
+      animation: fadeUp 0.4s ease both;
     }
-
     .card::before {
       content: '';
       position: absolute;
@@ -172,62 +155,28 @@
     }
     .data-row:last-child { border-bottom: none; }
 
-    .data-label {
-      font-size: 0.65rem;
-      color: rgba(240,237,232,0.45);
-      letter-spacing: 0.08em;
-    }
-
-    .data-value {
-      font-family: 'Orbitron', monospace;
-      font-size: 0.75rem;
-      font-weight: 700;
-      color: var(--white);
-      transition: color 0.2s;
-    }
-
+    .data-label { font-size: 0.65rem; color: rgba(240,237,232,0.45); letter-spacing: 0.08em; }
+    .data-value { font-family: 'Orbitron', monospace; font-size: 0.75rem; font-weight: 700; color: var(--white); transition: color 0.2s; }
     .data-value.highlight { color: var(--yellow); text-shadow: var(--glow); }
     .data-value.good      { color: #00e676; }
     .data-value.warn      { color: var(--red); }
 
-    /* ── Big value display ── */
-    .big-val {
-      text-align: center;
-      padding: 6px 0 2px;
-    }
-    .big-val .num {
-      font-family: 'Orbitron', monospace;
-      font-size: 2.4rem;
-      font-weight: 900;
-      color: var(--yellow);
-      text-shadow: var(--glow);
-      line-height: 1;
-    }
-    .big-val .unit {
-      font-size: 0.6rem;
-      color: rgba(255,210,0,0.5);
-      letter-spacing: 0.2em;
-    }
+    /* ── Speed ── */
+    .big-val { text-align: center; padding: 6px 0 2px; }
+    .big-val .num  { font-family: 'Orbitron', monospace; font-size: 2.4rem; font-weight: 900; color: var(--yellow); text-shadow: var(--glow); line-height: 1; }
+    .big-val .unit { font-size: 0.6rem; color: rgba(255,210,0,0.5); letter-spacing: 0.2em; }
 
-    /* ── Joystick Visualizer ── */
-    .joystick-wrap {
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-    }
+    .gauge-track { height: 5px; background: rgba(255,255,255,0.08); border-radius: 2px; overflow: hidden; margin-top: 6px; }
+    .gauge-fill  { height: 100%; border-radius: 2px; background: linear-gradient(90deg, var(--blue), var(--yellow), var(--red)); transition: width 0.1s; width: 0%; }
 
+    /* ── Joystick ── */
     .joystick-viz {
       position: relative;
       width: 80px; height: 80px;
-      margin: 0 auto;
+      margin: 4px auto 8px;
       border: 1px solid var(--border);
       border-radius: 50%;
       background: rgba(0,0,0,0.4);
-    }
-
-    .joystick-crosshair {
-      position: absolute;
-      inset: 0;
     }
     .joystick-crosshair::before,
     .joystick-crosshair::after {
@@ -235,15 +184,8 @@
       position: absolute;
       background: rgba(255,210,0,0.15);
     }
-    .joystick-crosshair::before {
-      width: 1px; height: 100%;
-      left: 50%; top: 0;
-    }
-    .joystick-crosshair::after {
-      height: 1px; width: 100%;
-      top: 50%; left: 0;
-    }
-
+    .joystick-crosshair::before { width: 1px; height: 100%; left: 50%; }
+    .joystick-crosshair::after  { height: 1px; width: 100%; top: 50%; }
     .joystick-dot {
       position: absolute;
       width: 10px; height: 10px;
@@ -255,54 +197,30 @@
       top: 50%; left: 50%;
     }
 
-    /* ── Bar Gauge ── */
-    .gauge-wrap {
-      margin-top: 2px;
-    }
-    .gauge-track {
-      height: 5px;
-      background: rgba(255,255,255,0.08);
-      border-radius: 2px;
-      overflow: hidden;
-      margin-top: 3px;
-    }
-    .gauge-fill {
-      height: 100%;
-      border-radius: 2px;
-      background: linear-gradient(90deg, var(--blue), var(--yellow), var(--red));
-      transition: width 0.1s;
-      width: 0%;
-    }
-
-    /* ── PID display ── */
-    .pid-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr 1fr;
-      gap: 4px;
-      margin-top: 4px;
-    }
-
-    .pid-cell {
-      text-align: center;
-      background: rgba(0,0,0,0.3);
-      border: 1px solid rgba(255,210,0,0.12);
-      border-radius: 3px;
-      padding: 5px 2px;
-    }
-    .pid-cell .pid-key {
+    /* ── Mode badge ── */
+    .mode-badge {
+      display: inline-block;
       font-family: 'Orbitron', monospace;
-      font-size: 0.55rem;
-      color: var(--yellow);
-      opacity: 0.7;
-    }
-    .pid-cell .pid-num {
-      font-family: 'Orbitron', monospace;
-      font-size: 0.8rem;
+      font-size: 0.6rem;
       font-weight: 700;
-      color: var(--white);
+      letter-spacing: 0.12em;
+      padding: 3px 8px;
+      border-radius: 3px;
+      background: rgba(255,210,0,0.12);
+      border: 1px solid rgba(255,210,0,0.3);
+      color: var(--yellow);
+      margin-top: 4px;
+      text-align: center;
+      width: 100%;
     }
 
-    /* ── Video Feed ── */
+    /* ── PID ── */
+    .pid-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 4px; margin-top: 4px; }
+    .pid-cell { text-align: center; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,210,0,0.12); border-radius: 3px; padding: 5px 2px; }
+    .pid-cell .pid-key { font-family: 'Orbitron', monospace; font-size: 0.55rem; color: var(--yellow); opacity: 0.7; }
+    .pid-cell .pid-num { font-family: 'Orbitron', monospace; font-size: 0.8rem; font-weight: 700; color: var(--white); }
+
+    /* ── Video ── */
     .video-wrap {
       position: relative;
       background: #000;
@@ -312,38 +230,20 @@
       display: flex;
       align-items: center;
       justify-content: center;
+      animation: fadeUp 0.4s ease 0.2s both;
     }
 
-    canvas {
-      width: 100%;
-      height: 100%;
-      object-fit: contain;
-      display: block;
-    }
+    canvas { width: 100%; height: 100%; object-fit: contain; display: block; }
 
-    .video-overlay {
-      position: absolute;
-      inset: 0;
-      pointer-events: none;
-    }
-
-    /* Corner brackets */
-    .corner {
-      position: absolute;
-      width: 20px; height: 20px;
-      border-color: var(--yellow);
-      border-style: solid;
-      opacity: 0.7;
-    }
-    .corner.tl { top: 8px; left: 8px;  border-width: 2px 0 0 2px; }
-    .corner.tr { top: 8px; right: 8px; border-width: 2px 2px 0 0; }
+    .corner { position: absolute; width: 20px; height: 20px; border-color: var(--yellow); border-style: solid; opacity: 0.7; }
+    .corner.tl { top: 8px;    left: 8px;  border-width: 2px 0 0 2px; }
+    .corner.tr { top: 8px;    right: 8px; border-width: 2px 2px 0 0; }
     .corner.bl { bottom: 8px; left: 8px;  border-width: 0 0 2px 2px; }
     .corner.br { bottom: 8px; right: 8px; border-width: 0 2px 2px 0; }
 
     .video-label {
       position: absolute;
-      top: 12px;
-      left: 50%;
+      top: 12px; left: 50%;
       transform: translateX(-50%);
       font-family: 'Orbitron', monospace;
       font-size: 0.55rem;
@@ -352,23 +252,16 @@
     }
 
     .no-signal {
-      position: absolute;
-      inset: 0;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
+      position: absolute; inset: 0;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
       gap: 8px;
       color: rgba(255,210,0,0.3);
       font-family: 'Orbitron', monospace;
       font-size: 0.7rem;
       letter-spacing: 0.2em;
     }
-
-    .no-signal-icon {
-      font-size: 2rem;
-      opacity: 0.3;
-    }
+    .no-signal-icon { font-size: 2rem; opacity: 0.3; }
 
     /* ── Footer ── */
     .footer {
@@ -384,29 +277,20 @@
       font-size: 0.6rem;
       color: rgba(240,237,232,0.35);
       letter-spacing: 0.1em;
+      animation: fadeUp 0.4s ease 0.25s both;
     }
 
-    #fps-display {
-      font-family: 'Orbitron', monospace;
-      font-size: 0.65rem;
-      color: var(--yellow);
-    }
-
-    /* Entry animation */
-    .card, .video-wrap, .header, .footer {
-      animation: fadeUp 0.4s ease both;
-    }
     @keyframes fadeUp {
       from { opacity: 0; transform: translateY(8px); }
       to   { opacity: 1; transform: translateY(0); }
     }
+
     .panel-left  .card:nth-child(1) { animation-delay: 0.05s; }
     .panel-left  .card:nth-child(2) { animation-delay: 0.10s; }
     .panel-left  .card:nth-child(3) { animation-delay: 0.15s; }
     .panel-right .card:nth-child(1) { animation-delay: 0.05s; }
     .panel-right .card:nth-child(2) { animation-delay: 0.10s; }
     .panel-right .card:nth-child(3) { animation-delay: 0.15s; }
-    .video-wrap { animation-delay: 0.2s; }
   </style>
 </head>
 <body>
@@ -426,7 +310,7 @@
     <div style="font-family:'Orbitron',monospace;font-size:0.6rem;color:rgba(255,210,0,0.4);letter-spacing:0.1em;" id="clock"></div>
   </header>
 
-  <!-- Left Panel -->
+  <!-- Left Panel — Car Data -->
   <aside class="panel-left">
 
     <div class="card">
@@ -435,27 +319,7 @@
         <div class="num" id="val-speed">0</div>
         <div class="unit">UNITS / S</div>
       </div>
-      <div class="gauge-wrap">
-        <div class="gauge-track"><div class="gauge-fill" id="gauge-speed"></div></div>
-      </div>
-    </div>
-
-    <div class="card">
-      <div class="card-title">Controls</div>
-      <div class="joystick-wrap">
-        <div class="joystick-viz">
-          <div class="joystick-crosshair"></div>
-          <div class="joystick-dot" id="joystick-dot"></div>
-        </div>
-        <div class="data-row">
-          <span class="data-label">UP / DOWN</span>
-          <span class="data-value highlight" id="val-ud">—</span>
-        </div>
-        <div class="data-row">
-          <span class="data-label">LEFT / RIGHT</span>
-          <span class="data-value highlight" id="val-lr">—</span>
-        </div>
-      </div>
+      <div class="gauge-track"><div class="gauge-fill" id="gauge-speed"></div></div>
     </div>
 
     <div class="card">
@@ -468,6 +332,15 @@
         <span class="data-label">TEMPERATURE</span>
         <span class="data-value" id="val-temp">—</span>
       </div>
+      <div class="data-row">
+        <span class="data-label">CLOSEST OBJ</span>
+        <span class="data-value highlight" id="val-closest">—</span>
+      </div>
+    </div>
+
+    <div class="card" style="flex:1;">
+      <div class="card-title">Event Log</div>
+      <div id="log" style="font-size:0.58rem;color:rgba(240,237,232,0.4);line-height:1.8;overflow-y:auto;height:100%;"></div>
     </div>
 
   </aside>
@@ -475,7 +348,7 @@
   <!-- Video Feed -->
   <div class="video-wrap">
     <canvas id="view"></canvas>
-    <div class="video-overlay">
+    <div style="position:absolute;inset:0;pointer-events:none;">
       <div class="corner tl"></div>
       <div class="corner tr"></div>
       <div class="corner bl"></div>
@@ -488,24 +361,32 @@
     </div>
   </div>
 
-  <!-- Right Panel -->
+  <!-- Right Panel — Movement Data -->
   <aside class="panel-right">
+
+    <div class="card">
+      <div class="card-title">Controls</div>
+      <div class="joystick-viz">
+        <div class="joystick-crosshair"></div>
+        <div class="joystick-dot" id="joystick-dot"></div>
+      </div>
+      <div class="data-row">
+        <span class="data-label">UP / DOWN</span>
+        <span class="data-value highlight" id="val-ud">—</span>
+      </div>
+      <div class="data-row">
+        <span class="data-label">LEFT / RIGHT</span>
+        <span class="data-value highlight" id="val-lr">—</span>
+      </div>
+      <div class="mode-badge" id="val-mode">NRF MODE</div>
+    </div>
 
     <div class="card">
       <div class="card-title">PID Controller</div>
       <div class="pid-grid">
-        <div class="pid-cell">
-          <div class="pid-key">KP</div>
-          <div class="pid-num" id="val-kp">—</div>
-        </div>
-        <div class="pid-cell">
-          <div class="pid-key">KI</div>
-          <div class="pid-num" id="val-ki">—</div>
-        </div>
-        <div class="pid-cell">
-          <div class="pid-key">KD</div>
-          <div class="pid-num" id="val-kd">—</div>
-        </div>
+        <div class="pid-cell"><div class="pid-key">KP</div><div class="pid-num" id="val-kp">—</div></div>
+        <div class="pid-cell"><div class="pid-key">KI</div><div class="pid-num" id="val-ki">—</div></div>
+        <div class="pid-cell"><div class="pid-key">KD</div><div class="pid-num" id="val-kd">—</div></div>
       </div>
     </div>
 
@@ -516,26 +397,24 @@
         <span class="data-value highlight" id="fps-display">— FPS</span>
       </div>
       <div class="data-row">
-        <span class="data-label">CAM STATUS</span>
+        <span class="data-label">CAM</span>
         <span class="data-value" id="cam-label">OFFLINE</span>
       </div>
       <div class="data-row">
-        <span class="data-label">DATA STATUS</span>
+        <span class="data-label">DATA</span>
         <span class="data-value" id="data-label">OFFLINE</span>
       </div>
-    </div>
-
-    <div class="card" style="flex:1;">
-      <div class="card-title">Event Log</div>
-      <div id="log" style="font-size:0.58rem;color:rgba(240,237,232,0.4);line-height:1.7;max-height:120px;overflow-y:auto;"></div>
+      <div class="data-row">
+        <span class="data-label">PACKETS</span>
+        <span class="data-value" id="packet-count">0</span>
+      </div>
     </div>
 
   </aside>
 
-  <!-- Footer -->
   <footer class="footer">
     <span>RC-CAM SYSTEM v1.0</span>
-    <span id="packet-count">PACKETS: 0</span>
+    <span id="clock-footer"></span>
     <span>DROPLET // TOR1</span>
   </footer>
 
@@ -545,61 +424,54 @@
 <script>
   // ── Clock ──────────────────────────────────────────────────────────────────
   function updateClock() {
-    const now = new Date();
-    document.getElementById('clock').textContent =
-      now.toTimeString().slice(0, 8) + ' UTC' + (now.getTimezoneOffset() <= 0 ? '+' : '-') +
-      String(Math.abs(now.getTimezoneOffset() / 60)).padStart(2,'0');
+    const t = new Date().toTimeString().slice(0, 8);
+    document.getElementById('clock').textContent = t;
+    document.getElementById('clock-footer').textContent = t;
   }
   setInterval(updateClock, 1000);
   updateClock();
 
-  // ── Event log ─────────────────────────────────────────────────────────────
+  // ── Log ───────────────────────────────────────────────────────────────────
   let logLines = [];
   function addLog(msg) {
-    const time = new Date().toTimeString().slice(0,8);
-    logLines.push(`[${time}] ${msg}`);
-    if (logLines.length > 20) logLines.shift();
-    document.getElementById('log').innerHTML = logLines.join('<br>');
-    document.getElementById('log').scrollTop = 999999;
+    const t = new Date().toTimeString().slice(0, 8);
+    logLines.push(`[${t}] ${msg}`);
+    if (logLines.length > 30) logLines.shift();
+    const el = document.getElementById('log');
+    el.innerHTML = logLines.join('<br>');
+    el.scrollTop = el.scrollHeight;
   }
 
   // ── Packet counter ────────────────────────────────────────────────────────
   let packetCount = 0;
   function bumpPackets() {
-    packetCount++;
-    document.getElementById('packet-count').textContent = `PACKETS: ${packetCount}`;
+    document.getElementById('packet-count').textContent = ++packetCount;
   }
 
-  // ── Video feed (Camera Socket.IO) ─────────────────────────────────────────
-  const canvas  = document.getElementById('view');
-  const ctx     = canvas.getContext('2d');
-  const noSig   = document.getElementById('no-signal');
-  const camDot  = document.getElementById('cam-dot');
+  // ── Video (Camera Socket.IO on same host) ─────────────────────────────────
+  const canvas = document.getElementById('view');
+  const ctx    = canvas.getContext('2d');
+  const camDot = document.getElementById('cam-dot');
 
-  let frameCount  = 0;
-  let lastTime    = performance.now();
-  let pendingFrame = null;
-  let rendering   = false;
+  let frameCount = 0, lastTime = performance.now();
+  let pendingFrame = null, rendering = false;
 
-  // Connect to the camera server (same host, port 8080)
   const camSocket = io();
 
   camSocket.on('connect', () => {
     camDot.className = 'status-dot connected';
     document.getElementById('cam-status').textContent = 'CAM LIVE';
-    document.getElementById('cam-label').textContent = 'ONLINE';
-    document.getElementById('cam-label').className = 'data-value good';
+    document.getElementById('cam-label').textContent  = 'ONLINE';
+    document.getElementById('cam-label').className    = 'data-value good';
     addLog('Camera socket connected');
   });
-
   camSocket.on('disconnect', () => {
     camDot.className = 'status-dot';
     document.getElementById('cam-status').textContent = 'CAM OFFLINE';
-    document.getElementById('cam-label').textContent = 'OFFLINE';
-    document.getElementById('cam-label').className = 'data-value warn';
+    document.getElementById('cam-label').textContent  = 'OFFLINE';
+    document.getElementById('cam-label').className    = 'data-value warn';
     addLog('Camera socket disconnected');
   });
-
   camSocket.on('frame', (data) => {
     pendingFrame = data;
     bumpPackets();
@@ -617,9 +489,8 @@
     const img  = new Image();
 
     img.onload = () => {
-      noSig.style.display = 'none';
-      canvas.width  = img.width;
-      canvas.height = img.height;
+      document.getElementById('no-signal').style.display = 'none';
+      canvas.width = img.width; canvas.height = img.height;
       ctx.drawImage(img, 0, 0);
       URL.revokeObjectURL(url);
 
@@ -627,28 +498,21 @@
       const now = performance.now();
       if (now - lastTime >= 1000) {
         document.getElementById('fps-display').textContent = `${frameCount} FPS`;
-        frameCount = 0;
-        lastTime = now;
+        frameCount = 0; lastTime = now;
       }
 
-      // Live dot pulse when frame arrives
       camDot.className = 'status-dot live';
       setTimeout(() => camDot.className = 'status-dot connected', 300);
-
       requestAnimationFrame(renderNext);
     };
-
     img.onerror = () => { URL.revokeObjectURL(url); requestAnimationFrame(renderNext); };
     img.src = url;
   }
 
   // ── Telemetry WebSocket (second Droplet) ──────────────────────────────────
-  // Replace with your second droplet's IP and port
-  const DATA_WS_URL = 'ws://209.38.135.76:80/ws';
-
-  const dataDot   = document.getElementById('data-dot');
-  let   dataWs    = null;
-  let   dataRetry = null;
+  const DATA_WS_URL = 'ws://209.38.135.76:80/ws_car';
+  const dataDot = document.getElementById('data-dot');
+  let dataWs, dataRetry;
 
   function connectDataWs() {
     dataWs = new WebSocket(DATA_WS_URL);
@@ -656,100 +520,114 @@
     dataWs.onopen = () => {
       dataDot.className = 'status-dot connected';
       document.getElementById('data-status').textContent = 'DATA LIVE';
-      document.getElementById('data-label').textContent = 'ONLINE';
-      document.getElementById('data-label').className = 'data-value good';
+      document.getElementById('data-label').textContent  = 'ONLINE';
+      document.getElementById('data-label').className    = 'data-value good';
       addLog('Telemetry socket connected');
       clearTimeout(dataRetry);
     };
-
     dataWs.onclose = () => {
       dataDot.className = 'status-dot';
       document.getElementById('data-status').textContent = 'DATA OFFLINE';
-      document.getElementById('data-label').textContent = 'OFFLINE';
-      document.getElementById('data-label').className = 'data-value warn';
-      addLog('Telemetry socket lost — retrying...');
+      document.getElementById('data-label').textContent  = 'OFFLINE';
+      document.getElementById('data-label').className    = 'data-value warn';
+      addLog('Telemetry lost — retrying...');
       dataRetry = setTimeout(connectDataWs, 3000);
     };
-
-    dataWs.onerror = () => {
-      addLog('Telemetry connection error');
-    };
-
+    dataWs.onerror = () => addLog('Telemetry connection error');
     dataWs.onmessage = (e) => {
-      try {
-        const d = JSON.parse(e.data);
-        updateTelemetry(d);
-      } catch (err) {
-        addLog('Bad data packet received');
-      }
+      try { updateCarData(JSON.parse(e.data)); }
+      catch { addLog('Bad car_data packet'); }
+    };
+  }
+
+  // Second socket for movement_data if you want to display it live too
+  // Connect to /ws_input or a dedicated read endpoint on your second droplet
+  const MOVEMENT_WS_URL = 'ws://209.38.135.76:80/ws';
+  let movementWs, movementRetry;
+
+  function connectMovementWs() {
+    movementWs = new WebSocket(MOVEMENT_WS_URL);
+
+    movementWs.onopen  = () => addLog('Movement socket connected');
+    movementWs.onclose = () => {
+      addLog('Movement socket lost — retrying...');
+      movementRetry = setTimeout(connectMovementWs, 3000);
+    };
+    movementWs.onmessage = (e) => {
+      try { updateMovementData(JSON.parse(e.data)); }
+      catch { addLog('Bad movement_data packet'); }
     };
   }
 
   connectDataWs();
+  connectMovementWs();
 
-  // ── Update UI from telemetry data ─────────────────────────────────────────
-  function updateTelemetry(d) {
-    // Speed
+  // ── Update UI — car_data ──────────────────────────────────────────────────
+  function updateCarData(d) {
     if (d.speed !== undefined) {
       document.getElementById('val-speed').textContent = d.speed;
-      const pct = Math.min(100, Math.abs(d.speed) / 20 * 100); // adjust max as needed
-      document.getElementById('gauge-speed').style.width = pct + '%';
+      document.getElementById('gauge-speed').style.width =
+        Math.min(100, Math.abs(d.speed) / 20 * 100) + '%';
     }
-
-    // Up/Down and Left/Right (PWM values typically 1000-2000)
-    if (d['up/down'] !== undefined) {
-      document.getElementById('val-ud').textContent = d['up/down'];
-      updateJoystick(d['up/down'], d['left/right']);
-    }
-    if (d['left/right'] !== undefined) {
-      document.getElementById('val-lr').textContent = d['left/right'];
-    }
-
-    // Environment
     if (d.air !== undefined) {
       const el = document.getElementById('val-air');
       el.textContent = d.air;
-      el.className = 'data-value ' + (d.air === 'Good' ? 'good' : 'warn');
+      el.className   = 'data-value ' + (d.air === 'Good' ? 'good' : 'warn');
     }
     if (d.temperature !== undefined) {
       const el = document.getElementById('val-temp');
       el.textContent = d.temperature + ' °C';
-      el.className = 'data-value ' + (d.temperature > 35 ? 'warn' : '');
+      el.className   = 'data-value ' + (d.temperature > 35 ? 'warn' : '');
     }
+    if (d.closest_object !== undefined) {
+      const el = document.getElementById('val-closest');
+      el.textContent = d.closest_object;
+      el.className   = 'data-value ' +
+        (d.closest_object === 'None Detected' ? 'good' : 'warn');
+    }
+  }
 
-    // PID
-    if (d.kp !== undefined) document.getElementById('val-kp').textContent = d.kp.toFixed(1);
-    if (d.ki !== undefined) document.getElementById('val-ki').textContent = d.ki.toFixed(1);
-    if (d.kd !== undefined) document.getElementById('val-kd').textContent = d.kd.toFixed(1);
+  // ── Update UI — movement_data ─────────────────────────────────────────────
+  function updateMovementData(d) {
+    if (d['up/down']    !== undefined) document.getElementById('val-ud').textContent = d['up/down'];
+    if (d['left/right'] !== undefined) document.getElementById('val-lr').textContent = d['left/right'];
+    if (d.kp !== undefined) document.getElementById('val-kp').textContent = parseFloat(d.kp).toFixed(1);
+    if (d.ki !== undefined) document.getElementById('val-ki').textContent = parseFloat(d.ki).toFixed(1);
+    if (d.kd !== undefined) document.getElementById('val-kd').textContent = parseFloat(d.kd).toFixed(1);
+    if (d.mode !== undefined) document.getElementById('val-mode').textContent = d.mode.toUpperCase();
+    if (d['up/down'] !== undefined && d['left/right'] !== undefined) {
+      updateJoystick(d['up/down'], d['left/right']);
+    }
   }
 
   // ── Joystick visualizer ───────────────────────────────────────────────────
-  // PWM range is typically 1000–2000, center at 1500
   function updateJoystick(ud, lr) {
-    const dot = document.getElementById('joystick-dot');
-    const center = 1500, range = 500;
-    // Normalize to -1 to 1
-    const x = Math.max(-1, Math.min(1, ((lr  - center) / range)));
-    const y = Math.max(-1, Math.min(1, ((ud  - center) / range)));
-    // Map to circle (radius 30px, center at 40px)
-    const radius = 28;
-    const px = 40 + x * radius;
-    const py = 40 - y * radius; // invert Y so up = up
-    dot.style.left = px + 'px';
-    dot.style.top  = py + 'px';
-  }
+  const center = 1950;
+  const maxVal = 4095;
+  const minVal = 0;
 
-  // ── Seed with default values for demo ────────────────────────────────────
-  updateTelemetry({
-    "up/down": 1950,
-    "left/right": 1950,
-    "speed": 0,
-    "air": "Good",
-    "temperature": 25,
-    "kp": 2.0,
-    "ki": 0.5,
-    "kd": 0.1
-  });
+  // Normalize each direction independently around center
+  // Above center: (value - center) / (max - center)
+  // Below center: (value - center) / (center - min)
+  const normalizeAxis = (val) => {
+    if (val >= center) {
+      return (val - center) / (maxVal - center); // 0 to 1
+    } else {
+      return (val - center) / center;             // -1 to 0
+    }
+  };
+
+  const x = Math.max(-1, Math.min(1, normalizeAxis(lr)));
+  const y = Math.max(-1, Math.min(1, normalizeAxis(ud)));
+
+  const dot = document.getElementById('joystick-dot');
+  dot.style.left = (40 + x * 28) + 'px';
+  dot.style.top  = (40 - y * 28) + 'px'; // Invert Y so up = up
+}
+
+  // ── Seed defaults ─────────────────────────────────────────────────────────
+  updateCarData({ speed: 0, air: 'Good', temperature: 25, closest_object: 'None Detected' });
+  updateMovementData({ 'up/down': 1950, 'left/right': 1950, kp: 2.0, ki: 0.5, kd: 0.1, mode: 'NRF Mode' });
 
   addLog('System initialized');
   addLog('Awaiting camera feed...');
