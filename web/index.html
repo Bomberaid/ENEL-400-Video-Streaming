@@ -155,10 +155,11 @@
     }
     .data-row:last-child { border-bottom: none; }
 
-    .data-label { font-size: 0.65rem; color: rgba(240,237,232,0.45); letter-spacing: 0.08em; }
-    .data-value { font-family: 'Orbitron', monospace; font-size: 0.75rem; font-weight: 700; color: var(--white); transition: color 0.2s; }
+    .data-label   { font-size: 0.65rem; color: rgba(240,237,232,0.45); letter-spacing: 0.08em; }
+    .data-value   { font-family: 'Orbitron', monospace; font-size: 0.75rem; font-weight: 700; color: var(--white); transition: color 0.3s; }
     .data-value.highlight { color: var(--yellow); text-shadow: var(--glow); }
     .data-value.good      { color: #00e676; }
+    .data-value.caution   { color: var(--yellow); }
     .data-value.warn      { color: var(--red); }
 
     /* ── Speed ── */
@@ -326,16 +327,8 @@
     <div class="card">
       <div class="card-title">Environment</div>
       <div class="data-row">
-        <span class="data-label">AIR QUALITY</span>
-        <span class="data-value good" id="val-air">—</span>
-      </div>
-      <div class="data-row">
-        <span class="data-label">TEMPERATURE</span>
-        <span class="data-value" id="val-temp">—</span>
-      </div>
-      <div class="data-row">
         <span class="data-label">CLOSEST OBJ</span>
-        <span class="data-value highlight" id="val-closest">—</span>
+        <span class="data-value good" id="val-closest">—</span>
       </div>
     </div>
 
@@ -568,21 +561,24 @@
       document.getElementById('gauge-speed').style.width =
         Math.min(100, Math.abs(kmh) / 20 * 100) + '%';
     }
-    if (d.air !== undefined) {
-      const el = document.getElementById('val-air');
-      el.textContent = d.air;
-      el.className   = 'data-value ' + (d.air === 'Good' ? 'good' : 'warn');
-    }
-    if (d.temperature !== undefined) {
-      const el = document.getElementById('val-temp');
-      el.textContent = d.temperature + ' °C';
-      el.className   = 'data-value ' + (d.temperature > 35 ? 'warn' : '');
-    }
     if (d.closest_object !== undefined) {
-      const el = document.getElementById('val-closest');
-      el.textContent = d.closest_object;
-      el.className   = 'data-value ' +
-        (d.closest_object === 'None Detected' ? 'good' : 'warn');
+      const el  = document.getElementById('val-closest');
+      const raw = d.closest_object;
+      const num = parseFloat(raw);
+
+      if (isNaN(num) || num > 40) {
+        el.textContent = 'Object Not Detected';
+        el.className   = 'data-value good';
+      } else {
+        el.textContent = raw;
+        if (num <= 15) {
+          el.className = 'data-value warn';       // red:    0–15 cm
+        } else if (num <= 30) {
+          el.className = 'data-value caution';    // yellow: 15–30 cm
+        } else {
+          el.className = 'data-value good';       // green:  30–40 cm
+        }
+      }
     }
   }
 
@@ -596,7 +592,7 @@
     if (d.mode !== undefined) {
       const badge    = document.getElementById('val-mode');
       const isSports = d.mode.toLowerCase() === 'sports';
-      badge.textContent    = isSports ? 'SPORTS MODE' : 'ROVER MODE';
+      badge.textContent        = isSports ? 'SPORTS MODE'              : 'ROVER MODE';
       badge.style.background   = isSports ? 'rgba(232, 0, 58, 0.15)'  : 'rgba(255, 210, 0, 0.12)';
       badge.style.borderColor  = isSports ? 'rgba(232, 0, 58, 0.4)'   : 'rgba(255, 210, 0, 0.3)';
       badge.style.color        = isSports ? 'var(--red)'               : 'var(--yellow)';
@@ -628,7 +624,7 @@
   }
 
   // ── Seed defaults ─────────────────────────────────────────────────────────
-  updateCarData({ speed: 0, air: 'Good', temperature: 25, closest_object: 'None Detected' });
+  updateCarData({ speed: 0, closest_object: 'None Detected' });
   updateMovementData({ 'up/down': 1950, 'left/right': 1950, kp: 2.0, ki: 0.5, kd: 0.1, mode: 'Rover' });
 
   addLog('System initialized');
