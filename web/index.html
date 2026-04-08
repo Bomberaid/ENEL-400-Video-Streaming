@@ -212,6 +212,7 @@
       margin-top: 4px;
       text-align: center;
       width: 100%;
+      transition: background 0.3s, border-color 0.3s, color 0.3s;
     }
 
     /* ── PID ── */
@@ -378,7 +379,7 @@
         <span class="data-label">LEFT / RIGHT</span>
         <span class="data-value highlight" id="val-lr">—</span>
       </div>
-      <div class="mode-badge" id="val-mode">NRF MODE</div>
+      <div class="mode-badge" id="val-mode">ROVER MODE</div>
     </div>
 
     <div class="card">
@@ -510,9 +511,11 @@
   }
 
   // ── Telemetry WebSocket (second Droplet) ──────────────────────────────────
-  const DATA_WS_URL = 'ws://209.38.135.76:80/ws_car';
+  const DATA_WS_URL     = 'ws://209.38.135.76:80/ws_car';
+  const MOVEMENT_WS_URL = 'ws://209.38.135.76:80/ws';
+
   const dataDot = document.getElementById('data-dot');
-  let dataWs, dataRetry;
+  let dataWs, dataRetry, movementWs, movementRetry;
 
   function connectDataWs() {
     dataWs = new WebSocket(DATA_WS_URL);
@@ -539,11 +542,6 @@
       catch { addLog('Bad car_data packet'); }
     };
   }
-
-  // Second socket for movement_data if you want to display it live too
-  // Connect to /ws_input or a dedicated read endpoint on your second droplet
-  const MOVEMENT_WS_URL = 'ws://209.38.135.76:80/ws';
-  let movementWs, movementRetry;
 
   function connectMovementWs() {
     movementWs = new WebSocket(MOVEMENT_WS_URL);
@@ -595,7 +593,14 @@
     if (d.kp !== undefined) document.getElementById('val-kp').textContent = parseFloat(d.kp).toFixed(1);
     if (d.ki !== undefined) document.getElementById('val-ki').textContent = parseFloat(d.ki).toFixed(1);
     if (d.kd !== undefined) document.getElementById('val-kd').textContent = parseFloat(d.kd).toFixed(1);
-    if (d.mode !== undefined) document.getElementById('val-mode').textContent = d.mode.toUpperCase();
+    if (d.mode !== undefined) {
+      const badge    = document.getElementById('val-mode');
+      const isSports = d.mode.toLowerCase() === 'sports';
+      badge.textContent    = isSports ? 'SPORTS MODE' : 'ROVER MODE';
+      badge.style.background   = isSports ? 'rgba(232, 0, 58, 0.15)'  : 'rgba(255, 210, 0, 0.12)';
+      badge.style.borderColor  = isSports ? 'rgba(232, 0, 58, 0.4)'   : 'rgba(255, 210, 0, 0.3)';
+      badge.style.color        = isSports ? 'var(--red)'               : 'var(--yellow)';
+    }
     if (d['up/down'] !== undefined && d['left/right'] !== undefined) {
       updateJoystick(d['up/down'], d['left/right']);
     }
@@ -603,32 +608,28 @@
 
   // ── Joystick visualizer ───────────────────────────────────────────────────
   function updateJoystick(ud, lr) {
-  const center = 1950;
-  const maxVal = 4095;
-  const minVal = 0;
+    const center = 1950;
+    const maxVal = 4095;
 
-  // Normalize each direction independently around center
-  // Above center: (value - center) / (max - center)
-  // Below center: (value - center) / (center - min)
-  const normalizeAxis = (val) => {
-    if (val >= center) {
-      return (val - center) / (maxVal - center); // 0 to 1
-    } else {
-      return (val - center) / center;             // -1 to 0
-    }
-  };
+    const normalizeAxis = (val) => {
+      if (val >= center) {
+        return (val - center) / (maxVal - center);
+      } else {
+        return (val - center) / center;
+      }
+    };
 
-  const x = Math.max(-1, Math.min(1, normalizeAxis(lr)));
-  const y = Math.max(-1, Math.min(1, normalizeAxis(ud)));
+    const x = Math.max(-1, Math.min(1, normalizeAxis(lr)));
+    const y = Math.max(-1, Math.min(1, normalizeAxis(ud)));
 
-  const dot = document.getElementById('joystick-dot');
-  dot.style.left = (40 + x * 28) + 'px';
-  dot.style.top  = (40 - y * 28) + 'px'; // Invert Y so up = up
-}
+    const dot = document.getElementById('joystick-dot');
+    dot.style.left = (40 + x * 28) + 'px';
+    dot.style.top  = (40 - y * 28) + 'px';
+  }
 
   // ── Seed defaults ─────────────────────────────────────────────────────────
   updateCarData({ speed: 0, air: 'Good', temperature: 25, closest_object: 'None Detected' });
-  updateMovementData({ 'up/down': 1950, 'left/right': 1950, kp: 2.0, ki: 0.5, kd: 0.1, mode: 'NRF Mode' });
+  updateMovementData({ 'up/down': 1950, 'left/right': 1950, kp: 2.0, ki: 0.5, kd: 0.1, mode: 'Rover' });
 
   addLog('System initialized');
   addLog('Awaiting camera feed...');
