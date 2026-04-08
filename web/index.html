@@ -233,7 +233,7 @@
       animation: fadeUp 0.4s ease 0.2s both;
     }
 
-    canvas { width: 100%; height: 100%; object-fit: contain; display: block; }
+    canvas { width: 100%; height: 100%; object-fit: contain; display: block; transform: rotate(180deg); }
 
     .corner { position: absolute; width: 20px; height: 20px; border-color: var(--yellow); border-style: solid; opacity: 0.7; }
     .corner.tl { top: 8px;    left: 8px;  border-width: 2px 0 0 2px; }
@@ -317,7 +317,7 @@
       <div class="card-title">Speed</div>
       <div class="big-val">
         <div class="num" id="val-speed">0</div>
-        <div class="unit">UNITS / S</div>
+        <div class="unit">KM / HR</div>
       </div>
       <div class="gauge-track"><div class="gauge-fill" id="gauge-speed"></div></div>
     </div>
@@ -565,9 +565,10 @@
   // ── Update UI — car_data ──────────────────────────────────────────────────
   function updateCarData(d) {
     if (d.speed !== undefined) {
-      document.getElementById('val-speed').textContent = d.speed;
+      const kmh = (d.speed * 3.6).toFixed(1);
+      document.getElementById('val-speed').textContent = kmh;
       document.getElementById('gauge-speed').style.width =
-        Math.min(100, Math.abs(d.speed) / 20 * 100) + '%';
+        Math.min(100, Math.abs(kmh) / 20 * 100) + '%';
     }
     if (d.air !== undefined) {
       const el = document.getElementById('val-air');
